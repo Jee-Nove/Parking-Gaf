@@ -58,6 +58,7 @@
     display: flex;
     gap: 8px;
     align-items: center;
+    flex-wrap: wrap;
   }
 
   .btn-layer {
@@ -74,29 +75,30 @@
   }
   .btn-layer:hover { background: rgba(233, 69, 96, 0.25); border-color: #e94560; }
   .btn-layer.active { background: #e94560; color: #fff; border-color: #e94560; }
-
-  .status-badge {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    padding: 4px 10px;
-    border-radius: 4px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+  .btn-add {
+    background: rgba(82, 183, 136, 0.15);
+    border-color: rgba(82, 183, 136, 0.4);
+    color: #52b788;
   }
-  .status-confirmed { background: #1b4332; color: #52b788; }
-  .status-pending { background: #3d2e00; color: #fbbf24; }
-  .status-refused { background: #3d0000; color: #f87171; }
+  .btn-add:hover { background: rgba(82, 183, 136, 0.3); border-color: #52b788; }
+  .btn-export {
+    background: rgba(96, 165, 250, 0.15);
+    border-color: rgba(96, 165, 250, 0.4);
+    color: #60a5fa;
+  }
+  .btn-export:hover { background: rgba(96, 165, 250, 0.3); border-color: #60a5fa; }
 
   #map {
     flex: 1;
     z-index: 1;
   }
 
+  /* ---- SIDEBAR ---- */
   .sidebar {
     position: absolute;
     top: 70px;
     right: 12px;
-    width: 300px;
+    width: 310px;
     max-height: calc(100vh - 90px);
     overflow-y: auto;
     background: rgba(15, 15, 15, 0.92);
@@ -124,6 +126,9 @@
     border-bottom: 1px solid rgba(255,255,255,0.06);
     cursor: pointer;
     transition: all 0.15s;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
   }
   .parking-item:hover { padding-left: 6px; }
   .parking-item:last-child { border-bottom: none; }
@@ -135,6 +140,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-wrap: wrap;
   }
 
   .parking-dot {
@@ -142,13 +148,28 @@
     height: 10px;
     border-radius: 50%;
     flex-shrink: 0;
+    margin-top: 4px;
   }
 
   .parking-info {
     font-size: 11px;
     color: #888;
-    margin-left: 18px;
   }
+
+  .parking-content { flex: 1; }
+
+  .status-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+  .status-confirmed { background: #1b4332; color: #52b788; }
+  .status-pending { background: #3d2e00; color: #fbbf24; }
+  .status-abandoned { background: #3d0000; color: #f87171; }
 
   .total-bar {
     margin-top: 14px;
@@ -191,6 +212,162 @@
     border-radius: 50%;
   }
 
+  /* ---- EDIT PANEL ---- */
+  .edit-panel {
+    position: absolute;
+    top: 70px;
+    left: 12px;
+    width: 340px;
+    max-height: calc(100vh - 90px);
+    overflow-y: auto;
+    background: rgba(15, 15, 15, 0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(233, 69, 96, 0.3);
+    border-radius: 10px;
+    padding: 20px;
+    z-index: 999;
+    display: none;
+  }
+
+  .edit-panel.visible { display: block; }
+
+  .edit-panel h3 {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #e94560;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .edit-close {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+  }
+  .edit-close:hover { color: #fff; }
+
+  .field {
+    margin-bottom: 14px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+  }
+
+  .field input, .field select, .field textarea {
+    width: 100%;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 6px;
+    color: #e8e4df;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: #e94560;
+  }
+  .field select {
+    cursor: pointer;
+  }
+  .field textarea {
+    resize: vertical;
+    min-height: 60px;
+  }
+  .field select option {
+    background: #1a1a1a;
+    color: #e8e4df;
+  }
+
+  .coord-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .edit-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .btn-save {
+    flex: 1;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+    background: #e94560;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-save:hover { background: #d63b55; }
+
+  .btn-delete {
+    padding: 10px 16px;
+    border-radius: 6px;
+    border: 1.5px solid rgba(248, 113, 113, 0.4);
+    background: rgba(248, 113, 113, 0.1);
+    color: #f87171;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-delete:hover { background: rgba(248, 113, 113, 0.25); border-color: #f87171; }
+
+  .drag-hint {
+    font-size: 11px;
+    color: #666;
+    font-style: italic;
+    margin-top: 4px;
+  }
+
+  /* ---- TOAST ---- */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1b4332;
+    color: #52b788;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 9999;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    border: 1px solid rgba(82,183,136,0.3);
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
   /* Leaflet popup custom */
   .leaflet-popup-content-wrapper {
     background: rgba(15, 15, 15, 0.95) !important;
@@ -202,7 +379,6 @@
   }
   .leaflet-popup-tip {
     background: rgba(15, 15, 15, 0.95) !important;
-    border: 1px solid rgba(233, 69, 96, 0.3) !important;
   }
   .leaflet-popup-content {
     margin: 12px 14px !important;
@@ -220,6 +396,21 @@
     color: #aaa;
   }
   .popup-detail strong { color: #e94560; }
+  .popup-edit-btn {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 5px 14px;
+    background: #e94560;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .popup-edit-btn:hover { background: #d63b55; }
 
   .leaflet-control-zoom a {
     background: rgba(15,15,15,0.9) !important;
@@ -227,8 +418,9 @@
     border-color: rgba(233,69,96,0.3) !important;
   }
 
-  @media (max-width: 700px) {
-    .sidebar { width: calc(100vw - 24px); right: 12px; font-size: 12px; }
+  @media (max-width: 768px) {
+    .sidebar { width: calc(100vw - 24px); right: 12px; }
+    .edit-panel { width: calc(100vw - 24px); left: 12px; }
     header { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
   }
 </style>
@@ -246,11 +438,14 @@
     <button class="btn-layer active" onclick="toggleSatellite(false)" id="btn-plan">Plan</button>
     <button class="btn-layer" onclick="toggleSatellite(true)" id="btn-sat">Satellite</button>
     <button class="btn-layer" onclick="toggleSidebar()" id="btn-list">Liste</button>
+    <button class="btn-layer btn-add" onclick="addNewParking()">+ Ajouter</button>
+    <button class="btn-layer btn-export" onclick="exportData()">Exporter JSON</button>
   </div>
 </header>
 
 <div id="map"></div>
 
+<!-- SIDEBAR -->
 <div class="sidebar" id="sidebar">
   <h3>Parkings identifiés</h3>
   <div id="parking-list"></div>
@@ -261,23 +456,75 @@
   <div class="legend">
     <div class="legend-item"><div class="legend-dot" style="background:#52b788"></div> Confirmé</div>
     <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div> En négo</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#f87171"></div> Refusé</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div> Public</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f87171"></div> Abandonné</div>
   </div>
 </div>
 
+<!-- EDIT PANEL -->
+<div class="edit-panel" id="edit-panel">
+  <h3>
+    <span id="edit-title">Modifier le point</span>
+    <button class="edit-close" onclick="closeEditPanel()">&times;</button>
+  </h3>
+  <div class="field">
+    <label>Nom</label>
+    <input type="text" id="edit-name" placeholder="Ex: Parking VIP">
+  </div>
+  <div class="field">
+    <label>Statut</label>
+    <select id="edit-status">
+      <option value="confirmed">✅ Confirmé</option>
+      <option value="pending">⏳ En négociation</option>
+      <option value="abandoned">❌ Abandonné</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>Type</label>
+    <select id="edit-type">
+      <option value="parking">Parking</option>
+      <option value="venue">Salle / Lieu</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>Nombre de places</label>
+    <input type="text" id="edit-places" placeholder="Ex: 200 ou 600-800">
+  </div>
+  <div class="field">
+    <label>Affectation</label>
+    <input type="text" id="edit-affectation" placeholder="Ex: VIP, PSH, Public...">
+  </div>
+  <div class="field">
+    <label>Notes</label>
+    <textarea id="edit-notes" placeholder="Infos complémentaires..."></textarea>
+  </div>
+  <div class="field">
+    <label>Coordonnées</label>
+    <div class="coord-row">
+      <input type="text" id="edit-lat" placeholder="Latitude">
+      <input type="text" id="edit-lng" placeholder="Longitude">
+    </div>
+    <div class="drag-hint">💡 Tu peux aussi glisser-déposer le marqueur sur la carte</div>
+  </div>
+  <div class="edit-actions">
+    <button class="btn-save" onclick="saveEdit()">💾 Enregistrer</button>
+    <button class="btn-delete" onclick="deleteParking()">Supprimer</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
 <script>
 // ========================================================
-// DONNÉES DES PARKINGS — MODIFIE ICI FACILEMENT
+// DONNÉES DES PARKINGS
 // ========================================================
-const parkings = [
+const DEFAULT_PARKINGS = [
   {
     id: "6mic",
-    name: "🎵 6MIC (salle)",
+    name: "6MIC (salle)",
     lat: 43.51921, lng: 5.42241,
     type: "venue",
-    color: "#e94560",
-    places: null,
+    places: "",
     status: "confirmed",
     affectation: "Salle de spectacle",
     notes: "160 Rue Pascal Duverger"
@@ -287,7 +534,6 @@ const parkings = [
     name: "P1 & P2 (Orange)",
     lat: 43.51880, lng: 5.42350,
     type: "parking",
-    color: "#fbbf24",
     places: "À définir",
     status: "pending",
     affectation: "À définir",
@@ -298,8 +544,7 @@ const parkings = [
     name: "Parking sauvage (face 6MIC)",
     lat: 43.51870, lng: 5.42140,
     type: "parking",
-    color: "#60a5fa",
-    places: 200,
+    places: "200",
     status: "confirmed",
     affectation: "Public",
     notes: "~200 places, en face du 6MIC"
@@ -309,7 +554,6 @@ const parkings = [
     name: "Grande zone à aménager",
     lat: 43.51780, lng: 5.42050,
     type: "parking",
-    color: "#fbbf24",
     places: "600-800",
     status: "pending",
     affectation: "Public",
@@ -320,7 +564,6 @@ const parkings = [
     name: "Parking PSH + VIP",
     lat: 43.51950, lng: 5.42300,
     type: "parking",
-    color: "#52b788",
     places: "À définir",
     status: "confirmed",
     affectation: "PSH + VIP",
@@ -331,7 +574,6 @@ const parkings = [
     name: "Parking Voyage Privé",
     lat: 43.51937, lng: 5.41986,
     type: "parking",
-    color: "#fbbf24",
     places: "60 (souterrain) + ext.",
     status: "pending",
     affectation: "À définir",
@@ -342,7 +584,6 @@ const parkings = [
     name: "Parking Golf",
     lat: 43.51750, lng: 5.41850,
     type: "parking",
-    color: "#fbbf24",
     places: "40-70 (+20)",
     status: "pending",
     affectation: "À définir",
@@ -353,7 +594,6 @@ const parkings = [
     name: "Parking Carrefour",
     lat: 43.52848, lng: 5.43215,
     type: "parking",
-    color: "#60a5fa",
     places: "Grand",
     status: "confirmed",
     affectation: "Public + navette",
@@ -361,22 +601,38 @@ const parkings = [
   }
 ];
 
+// Load from localStorage or use defaults
+let parkings = JSON.parse(localStorage.getItem('parkings-gaf')) || JSON.parse(JSON.stringify(DEFAULT_PARKINGS));
+
+function saveParkings() {
+  localStorage.setItem('parkings-gaf', JSON.stringify(parkings));
+}
+
 // ========================================================
-// INIT MAP
+// STATUS CONFIG
+// ========================================================
+const STATUS_CONFIG = {
+  confirmed: { color: '#52b788', label: 'Confirmé', badge: 'status-confirmed', icon: '✅' },
+  pending:   { color: '#fbbf24', label: 'En négo',  badge: 'status-pending',   icon: '⏳' },
+  abandoned: { color: '#f87171', label: 'Abandonné', badge: 'status-abandoned', icon: '❌' }
+};
+
+function getColor(p) {
+  if (p.type === 'venue') return '#e94560';
+  return STATUS_CONFIG[p.status]?.color || '#888';
+}
+
+// ========================================================
+// MAP INIT
 // ========================================================
 const planLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  attribution: '© OpenStreetMap'
+  maxZoom: 19, attribution: '© OpenStreetMap'
 });
-
 const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-  maxZoom: 19,
-  attribution: '© Esri'
+  maxZoom: 19, attribution: '© Esri'
 });
-
 const labelsLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  opacity: 0.35
+  maxZoom: 19, opacity: 0.35
 });
 
 const map = L.map('map', {
@@ -387,7 +643,8 @@ const map = L.map('map', {
 });
 
 let isSatellite = false;
-let markers = [];
+let markerObjects = {}; // id -> { marker, label }
+let editingId = null;
 
 function toggleSatellite(sat) {
   isSatellite = sat;
@@ -413,7 +670,7 @@ function toggleSidebar() {
 }
 
 // ========================================================
-// CREATE MARKERS
+// MARKERS
 // ========================================================
 function createIcon(color, isVenue) {
   const size = isVenue ? 20 : 14;
@@ -426,6 +683,7 @@ function createIcon(color, isVenue) {
       border:${border}px solid #fff;
       border-radius:50%;
       box-shadow: 0 0 8px ${color}88, 0 2px 6px rgba(0,0,0,0.4);
+      cursor: grab;
     "></div>`,
     iconSize: [size, size],
     iconAnchor: [size/2, size/2],
@@ -433,44 +691,81 @@ function createIcon(color, isVenue) {
   });
 }
 
-parkings.forEach(p => {
-  const icon = createIcon(p.color, p.type === 'venue');
-  
-  const popupHtml = `
+function createLabelIcon(name) {
+  const cleanName = name.replace(/🎵\s?/, '');
+  return L.divIcon({
+    className: '',
+    html: `<div style="
+      font-family:'DM Sans',sans-serif;
+      font-size:11px;
+      font-weight:600;
+      color:#fff;
+      text-shadow: 0 0 4px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.6);
+      white-space:nowrap;
+      pointer-events:none;
+      transform: translateY(-22px);
+    ">${cleanName}</div>`,
+    iconSize: [0, 0],
+    iconAnchor: [0, 0]
+  });
+}
+
+function buildPopup(p) {
+  const sc = STATUS_CONFIG[p.status] || STATUS_CONFIG.pending;
+  return `
     <div class="popup-title">${p.name}</div>
     <div class="popup-detail">
       ${p.places ? `<strong>Places :</strong> ${p.places}<br>` : ''}
       ${p.affectation ? `<strong>Affectation :</strong> ${p.affectation}<br>` : ''}
-      <strong>Statut :</strong> ${p.status === 'confirmed' ? '✅ Confirmé' : p.status === 'pending' ? '⏳ En négociation' : '❌ Refusé'}<br>
+      <strong>Statut :</strong> ${sc.icon} ${sc.label}<br>
       ${p.notes ? `<em>${p.notes}</em>` : ''}
     </div>
+    <button class="popup-edit-btn" onclick="openEditPanel('${p.id}')">✏️ Modifier</button>
   `;
+}
 
-  const marker = L.marker([p.lat, p.lng], { icon })
-    .addTo(map)
-    .bindPopup(popupHtml);
-  
-  // Add label
-  const label = L.marker([p.lat, p.lng], {
-    icon: L.divIcon({
-      className: '',
-      html: `<div style="
-        font-family:'DM Sans',sans-serif;
-        font-size:11px;
-        font-weight:600;
-        color:#fff;
-        text-shadow: 0 0 4px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.6);
-        white-space:nowrap;
-        pointer-events:none;
-        transform: translateY(-22px);
-      ">${p.name.replace(/🎵\s?/, '').replace(/\s?\(.*\)/, '')}</div>`,
-      iconSize: [0, 0],
-      iconAnchor: [0, 0]
-    })
-  }).addTo(map);
-  
-  markers.push({ marker, label, data: p });
-});
+function renderMarkers() {
+  // Remove existing
+  Object.values(markerObjects).forEach(obj => {
+    map.removeLayer(obj.marker);
+    map.removeLayer(obj.label);
+  });
+  markerObjects = {};
+
+  parkings.forEach(p => {
+    const color = getColor(p);
+    const icon = createIcon(color, p.type === 'venue');
+
+    const marker = L.marker([p.lat, p.lng], { icon, draggable: true })
+      .addTo(map)
+      .bindPopup(buildPopup(p));
+
+    // Drag to update coords
+    marker.on('dragend', function(e) {
+      const pos = e.target.getLatLng();
+      p.lat = Math.round(pos.lat * 1000000) / 1000000;
+      p.lng = Math.round(pos.lng * 1000000) / 1000000;
+      saveParkings();
+      // Update label position
+      markerObjects[p.id].label.setLatLng([p.lat, p.lng]);
+      // Update popup
+      marker.setPopupContent(buildPopup(p));
+      // Update edit panel if open
+      if (editingId === p.id) {
+        document.getElementById('edit-lat').value = p.lat;
+        document.getElementById('edit-lng').value = p.lng;
+      }
+      showToast('📍 Position mise à jour');
+    });
+
+    const label = L.marker([p.lat, p.lng], {
+      icon: createLabelIcon(p.name),
+      interactive: false
+    }).addTo(map);
+
+    markerObjects[p.id] = { marker, label };
+  });
+}
 
 // ========================================================
 // SIDEBAR LIST
@@ -479,48 +774,165 @@ function renderList() {
   const list = document.getElementById('parking-list');
   let total = 0;
   let html = '';
-  
+
   parkings.filter(p => p.type === 'parking').forEach(p => {
-    const statusClass = p.status === 'confirmed' ? 'status-confirmed' : 
-                        p.status === 'pending' ? 'status-pending' : 'status-refused';
-    const statusLabel = p.status === 'confirmed' ? 'OK' : 
-                        p.status === 'pending' ? 'NÉGO' : 'NON';
-    
-    // Parse places for total
-    if (typeof p.places === 'number') total += p.places;
-    else if (typeof p.places === 'string') {
-      const match = p.places.match(/(\d+)/);
+    const sc = STATUS_CONFIG[p.status] || STATUS_CONFIG.pending;
+
+    if (p.places && p.status !== 'abandoned') {
+      const match = String(p.places).match(/(\d+)/);
       if (match) total += parseInt(match[1]);
     }
-    
+
     html += `
-      <div class="parking-item" onclick="flyTo(${p.lat}, ${p.lng})">
-        <div class="parking-name">
-          <div class="parking-dot" style="background:${p.color}"></div>
-          ${p.name}
-          <span class="status-badge ${statusClass}">${statusLabel}</span>
-        </div>
-        <div class="parking-info">
-          ${p.places ? `${p.places} places` : 'Places à définir'} · ${p.affectation}
-          ${p.notes ? `<br><em>${p.notes}</em>` : ''}
+      <div class="parking-item" onclick="flyTo('${p.id}')">
+        <div class="parking-dot" style="background:${getColor(p)}"></div>
+        <div class="parking-content">
+          <div class="parking-name">
+            ${p.name}
+            <span class="status-badge ${sc.badge}">${sc.label}</span>
+          </div>
+          <div class="parking-info">
+            ${p.places ? `${p.places} places` : 'Places à définir'} · ${p.affectation || '—'}
+            ${p.notes ? `<br><em>${p.notes}</em>` : ''}
+          </div>
         </div>
       </div>
     `;
   });
-  
+
   list.innerHTML = html;
-  document.getElementById('total-places').textContent = total + '+';
+  document.getElementById('total-places').textContent = total > 0 ? total + '+' : '—';
 }
 
-function flyTo(lat, lng) {
-  map.flyTo([lat, lng], 18, { duration: 0.8 });
-  markers.forEach(m => {
-    if (m.data.lat === lat && m.data.lng === lng) {
-      m.marker.openPopup();
-    }
-  });
+function flyTo(id) {
+  const p = parkings.find(x => x.id === id);
+  if (!p) return;
+  map.flyTo([p.lat, p.lng], 18, { duration: 0.8 });
+  if (markerObjects[id]) {
+    markerObjects[id].marker.openPopup();
+  }
 }
 
+// ========================================================
+// EDIT PANEL
+// ========================================================
+function openEditPanel(id) {
+  const p = parkings.find(x => x.id === id);
+  if (!p) return;
+  editingId = id;
+
+  document.getElementById('edit-title').textContent = 'Modifier : ' + p.name;
+  document.getElementById('edit-name').value = p.name;
+  document.getElementById('edit-status').value = p.status;
+  document.getElementById('edit-type').value = p.type;
+  document.getElementById('edit-places').value = p.places || '';
+  document.getElementById('edit-affectation').value = p.affectation || '';
+  document.getElementById('edit-notes').value = p.notes || '';
+  document.getElementById('edit-lat').value = p.lat;
+  document.getElementById('edit-lng').value = p.lng;
+
+  document.getElementById('edit-panel').classList.add('visible');
+  // Close popup
+  map.closePopup();
+}
+
+function closeEditPanel() {
+  document.getElementById('edit-panel').classList.remove('visible');
+  editingId = null;
+}
+
+function saveEdit() {
+  const p = parkings.find(x => x.id === editingId);
+  if (!p) return;
+
+  p.name = document.getElementById('edit-name').value.trim() || p.name;
+  p.status = document.getElementById('edit-status').value;
+  p.type = document.getElementById('edit-type').value;
+  p.places = document.getElementById('edit-places').value.trim();
+  p.affectation = document.getElementById('edit-affectation').value.trim();
+  p.notes = document.getElementById('edit-notes').value.trim();
+
+  const newLat = parseFloat(document.getElementById('edit-lat').value);
+  const newLng = parseFloat(document.getElementById('edit-lng').value);
+  if (!isNaN(newLat) && !isNaN(newLng)) {
+    p.lat = newLat;
+    p.lng = newLng;
+  }
+
+  saveParkings();
+  renderMarkers();
+  renderList();
+  closeEditPanel();
+  showToast('✅ Modifications enregistrées');
+}
+
+function deleteParking() {
+  if (!editingId) return;
+  const p = parkings.find(x => x.id === editingId);
+  if (!confirm(`Supprimer "${p.name}" ?`)) return;
+
+  parkings = parkings.filter(x => x.id !== editingId);
+  saveParkings();
+  renderMarkers();
+  renderList();
+  closeEditPanel();
+  showToast('🗑️ Point supprimé');
+}
+
+// ========================================================
+// ADD NEW PARKING
+// ========================================================
+function addNewParking() {
+  const center = map.getCenter();
+  const newId = 'parking-' + Date.now();
+  const newP = {
+    id: newId,
+    name: 'Nouveau parking',
+    lat: Math.round(center.lat * 1000000) / 1000000,
+    lng: Math.round(center.lng * 1000000) / 1000000,
+    type: 'parking',
+    places: '',
+    status: 'pending',
+    affectation: '',
+    notes: ''
+  };
+  parkings.push(newP);
+  saveParkings();
+  renderMarkers();
+  renderList();
+  openEditPanel(newId);
+  showToast('📌 Nouveau point ajouté — déplace-le sur la carte');
+}
+
+// ========================================================
+// EXPORT
+// ========================================================
+function exportData() {
+  const json = JSON.stringify(parkings, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'parkings-gaf-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📁 JSON exporté');
+}
+
+// ========================================================
+// TOAST
+// ========================================================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ========================================================
+// INIT
+// ========================================================
+renderMarkers();
 renderList();
 </script>
 </body>
