@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grand Amour Festival — Plan des Parkings</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #0f0f0f;
+    color: #e8e4df;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid #e94560;
+    flex-shrink: 0;
+    z-index: 1000;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #e94560;
+    line-height: 1;
+  }
+
+  .logo span {
+    display: block;
+    font-size: 20px;
+    letter-spacing: 1px;
+    color: #fff;
+    margin-top: 2px;
+  }
+
+  .header-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .btn-layer {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1.5px solid rgba(233, 69, 96, 0.4);
+    background: rgba(233, 69, 96, 0.1);
+    color: #e8e4df;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-layer:hover { background: rgba(233, 69, 96, 0.25); border-color: #e94560; }
+  .btn-layer.active { background: #e94560; color: #fff; border-color: #e94560; }
+
+  .status-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .status-confirmed { background: #1b4332; color: #52b788; }
+  .status-pending { background: #3d2e00; color: #fbbf24; }
+  .status-refused { background: #3d0000; color: #f87171; }
+
+  #map {
+    flex: 1;
+    z-index: 1;
+  }
+
+  .sidebar {
+    position: absolute;
+    top: 70px;
+    right: 12px;
+    width: 300px;
+    max-height: calc(100vh - 90px);
+    overflow-y: auto;
+    background: rgba(15, 15, 15, 0.92);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(233, 69, 96, 0.2);
+    border-radius: 10px;
+    padding: 16px;
+    z-index: 999;
+    font-size: 13px;
+  }
+
+  .sidebar h3 {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #e94560;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(233, 69, 96, 0.2);
+  }
+
+  .parking-item {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .parking-item:hover { padding-left: 6px; }
+  .parking-item:last-child { border-bottom: none; }
+
+  .parking-name {
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .parking-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .parking-info {
+    font-size: 11px;
+    color: #888;
+    margin-left: 18px;
+  }
+
+  .total-bar {
+    margin-top: 14px;
+    padding: 12px;
+    background: rgba(233, 69, 96, 0.1);
+    border: 1px solid rgba(233, 69, 96, 0.25);
+    border-radius: 8px;
+    text-align: center;
+  }
+  .total-bar .number {
+    font-family: 'Space Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: #e94560;
+  }
+  .total-bar .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #888;
+    margin-top: 2px;
+  }
+
+  .legend {
+    margin-top: 14px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: #999;
+  }
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  /* Leaflet popup custom */
+  .leaflet-popup-content-wrapper {
+    background: rgba(15, 15, 15, 0.95) !important;
+    border: 1px solid rgba(233, 69, 96, 0.3) !important;
+    border-radius: 8px !important;
+    color: #e8e4df !important;
+    font-family: 'DM Sans', sans-serif !important;
+    backdrop-filter: blur(8px);
+  }
+  .leaflet-popup-tip {
+    background: rgba(15, 15, 15, 0.95) !important;
+    border: 1px solid rgba(233, 69, 96, 0.3) !important;
+  }
+  .leaflet-popup-content {
+    margin: 12px 14px !important;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+  }
+  .popup-title {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 6px;
+    color: #fff;
+  }
+  .popup-detail {
+    font-size: 12px;
+    color: #aaa;
+  }
+  .popup-detail strong { color: #e94560; }
+
+  .leaflet-control-zoom a {
+    background: rgba(15,15,15,0.9) !important;
+    color: #e8e4df !important;
+    border-color: rgba(233,69,96,0.3) !important;
+  }
+
+  @media (max-width: 700px) {
+    .sidebar { width: calc(100vw - 24px); right: 12px; font-size: 12px; }
+    header { padding: 10px 14px; flex-wrap: wrap; gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo">
+      Grand Amour Festival
+      <span>Plan des Parkings</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="btn-layer active" onclick="toggleSatellite(false)" id="btn-plan">Plan</button>
+    <button class="btn-layer" onclick="toggleSatellite(true)" id="btn-sat">Satellite</button>
+    <button class="btn-layer" onclick="toggleSidebar()" id="btn-list">Liste</button>
+  </div>
+</header>
+
+<div id="map"></div>
+
+<div class="sidebar" id="sidebar">
+  <h3>Parkings identifiés</h3>
+  <div id="parking-list"></div>
+  <div class="total-bar">
+    <div class="number" id="total-places">—</div>
+    <div class="label">Places estimées (total)</div>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#52b788"></div> Confirmé</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div> En négo</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f87171"></div> Refusé</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div> Public</div>
+  </div>
+</div>
+
+<script>
+// ========================================================
+// DONNÉES DES PARKINGS — MODIFIE ICI FACILEMENT
+// ========================================================
+const parkings = [
+  {
+    id: "6mic",
+    name: "🎵 6MIC (salle)",
+    lat: 43.51921, lng: 5.42241,
+    type: "venue",
+    color: "#e94560",
+    places: null,
+    status: "confirmed",
+    affectation: "Salle de spectacle",
+    notes: "160 Rue Pascal Duverger"
+  },
+  {
+    id: "p1-p2",
+    name: "P1 & P2 (Orange)",
+    lat: 43.51880, lng: 5.42350,
+    type: "parking",
+    color: "#fbbf24",
+    places: "À définir",
+    status: "pending",
+    affectation: "À définir",
+    notes: "Parkings fermés, négociations en cours"
+  },
+  {
+    id: "sauvage",
+    name: "Parking sauvage (face 6MIC)",
+    lat: 43.51870, lng: 5.42140,
+    type: "parking",
+    color: "#60a5fa",
+    places: 200,
+    status: "confirmed",
+    affectation: "Public",
+    notes: "~200 places, en face du 6MIC"
+  },
+  {
+    id: "grande-zone",
+    name: "Grande zone à aménager",
+    lat: 43.51780, lng: 5.42050,
+    type: "parking",
+    color: "#fbbf24",
+    places: "600-800",
+    status: "pending",
+    affectation: "Public",
+    notes: "Nécessite pelleteuses et damage"
+  },
+  {
+    id: "psh-vip",
+    name: "Parking PSH + VIP",
+    lat: 43.51950, lng: 5.42300,
+    type: "parking",
+    color: "#52b788",
+    places: "À définir",
+    status: "confirmed",
+    affectation: "PSH + VIP",
+    notes: "À côté des foodtrucks"
+  },
+  {
+    id: "voyage-prive",
+    name: "Parking Voyage Privé",
+    lat: 43.51937, lng: 5.41986,
+    type: "parking",
+    color: "#fbbf24",
+    places: "60 (souterrain) + ext.",
+    status: "pending",
+    affectation: "À définir",
+    notes: "Souterrain 60 places (à négocier) + extérieur limité"
+  },
+  {
+    id: "golf",
+    name: "Parking Golf",
+    lat: 43.51750, lng: 5.41850,
+    type: "parking",
+    color: "#fbbf24",
+    places: "40-70 (+20)",
+    status: "pending",
+    affectation: "À définir",
+    notes: "40-70 places + 20 si ouverture grillage"
+  },
+  {
+    id: "carrefour",
+    name: "Parking Carrefour",
+    lat: 43.52848, lng: 5.43215,
+    type: "parking",
+    color: "#60a5fa",
+    places: "Grand",
+    status: "confirmed",
+    affectation: "Public + navette",
+    notes: "À ~1,5 km — navette prévue"
+  }
+];
+
+// ========================================================
+// INIT MAP
+// ========================================================
+const planLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '© OpenStreetMap'
+});
+
+const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom: 19,
+  attribution: '© Esri'
+});
+
+const labelsLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  opacity: 0.35
+});
+
+const map = L.map('map', {
+  center: [43.5192, 5.4220],
+  zoom: 16,
+  layers: [planLayer],
+  zoomControl: true
+});
+
+let isSatellite = false;
+let markers = [];
+
+function toggleSatellite(sat) {
+  isSatellite = sat;
+  if (sat) {
+    map.removeLayer(planLayer);
+    map.removeLayer(labelsLayer);
+    map.addLayer(satLayer);
+    map.addLayer(labelsLayer);
+    document.getElementById('btn-sat').classList.add('active');
+    document.getElementById('btn-plan').classList.remove('active');
+  } else {
+    map.removeLayer(satLayer);
+    map.removeLayer(labelsLayer);
+    map.addLayer(planLayer);
+    document.getElementById('btn-plan').classList.add('active');
+    document.getElementById('btn-sat').classList.remove('active');
+  }
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  sb.style.display = sb.style.display === 'none' ? 'block' : 'none';
+}
+
+// ========================================================
+// CREATE MARKERS
+// ========================================================
+function createIcon(color, isVenue) {
+  const size = isVenue ? 20 : 14;
+  const border = isVenue ? 3 : 2;
+  return L.divIcon({
+    className: '',
+    html: `<div style="
+      width:${size}px; height:${size}px;
+      background:${color};
+      border:${border}px solid #fff;
+      border-radius:50%;
+      box-shadow: 0 0 8px ${color}88, 0 2px 6px rgba(0,0,0,0.4);
+    "></div>`,
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2],
+    popupAnchor: [0, -size/2 - 4]
+  });
+}
+
+parkings.forEach(p => {
+  const icon = createIcon(p.color, p.type === 'venue');
+  
+  const popupHtml = `
+    <div class="popup-title">${p.name}</div>
+    <div class="popup-detail">
+      ${p.places ? `<strong>Places :</strong> ${p.places}<br>` : ''}
+      ${p.affectation ? `<strong>Affectation :</strong> ${p.affectation}<br>` : ''}
+      <strong>Statut :</strong> ${p.status === 'confirmed' ? '✅ Confirmé' : p.status === 'pending' ? '⏳ En négociation' : '❌ Refusé'}<br>
+      ${p.notes ? `<em>${p.notes}</em>` : ''}
+    </div>
+  `;
+
+  const marker = L.marker([p.lat, p.lng], { icon })
+    .addTo(map)
+    .bindPopup(popupHtml);
+  
+  // Add label
+  const label = L.marker([p.lat, p.lng], {
+    icon: L.divIcon({
+      className: '',
+      html: `<div style="
+        font-family:'DM Sans',sans-serif;
+        font-size:11px;
+        font-weight:600;
+        color:#fff;
+        text-shadow: 0 0 4px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.6);
+        white-space:nowrap;
+        pointer-events:none;
+        transform: translateY(-22px);
+      ">${p.name.replace(/🎵\s?/, '').replace(/\s?\(.*\)/, '')}</div>`,
+      iconSize: [0, 0],
+      iconAnchor: [0, 0]
+    })
+  }).addTo(map);
+  
+  markers.push({ marker, label, data: p });
+});
+
+// ========================================================
+// SIDEBAR LIST
+// ========================================================
+function renderList() {
+  const list = document.getElementById('parking-list');
+  let total = 0;
+  let html = '';
+  
+  parkings.filter(p => p.type === 'parking').forEach(p => {
+    const statusClass = p.status === 'confirmed' ? 'status-confirmed' : 
+                        p.status === 'pending' ? 'status-pending' : 'status-refused';
+    const statusLabel = p.status === 'confirmed' ? 'OK' : 
+                        p.status === 'pending' ? 'NÉGO' : 'NON';
+    
+    // Parse places for total
+    if (typeof p.places === 'number') total += p.places;
+    else if (typeof p.places === 'string') {
+      const match = p.places.match(/(\d+)/);
+      if (match) total += parseInt(match[1]);
+    }
+    
+    html += `
+      <div class="parking-item" onclick="flyTo(${p.lat}, ${p.lng})">
+        <div class="parking-name">
+          <div class="parking-dot" style="background:${p.color}"></div>
+          ${p.name}
+          <span class="status-badge ${statusClass}">${statusLabel}</span>
+        </div>
+        <div class="parking-info">
+          ${p.places ? `${p.places} places` : 'Places à définir'} · ${p.affectation}
+          ${p.notes ? `<br><em>${p.notes}</em>` : ''}
+        </div>
+      </div>
+    `;
+  });
+  
+  list.innerHTML = html;
+  document.getElementById('total-places').textContent = total + '+';
+}
+
+function flyTo(lat, lng) {
+  map.flyTo([lat, lng], 18, { duration: 0.8 });
+  markers.forEach(m => {
+    if (m.data.lat === lat && m.data.lng === lng) {
+      m.marker.openPopup();
+    }
+  });
+}
+
+renderList();
+</script>
+</body>
+</html>
