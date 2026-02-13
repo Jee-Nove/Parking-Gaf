@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parkings — Grand Amour Festival</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #CC0000;
+    --red-dark: #A30000;
+    --pink: #E91E8C;
+    --pink-light: #FF69B4;
+    --cream: #FFF5EB;
+    --cream-dark: #FAE8D4;
+    --text: #2D1810;
+    --text-light: #8B6F5E;
+    --white: #FFFFFF;
+    --green: #2D8B46;
+    --green-light: #E8F5E9;
+    --yellow: #E8A000;
+    --yellow-light: #FFF8E1;
+    --grey: #F87171;
+    --grey-light: #FFEBEE;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---- HEADER ---- */
+  header {
+    background: var(--red);
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 20px rgba(204,0,0,0.3);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .header-logo {
+    height: 52px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+  }
+
+  .header-title {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--white);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    line-height: 1.2;
+  }
+  .header-title span {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    opacity: 0.85;
+  }
+
+  .header-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 16px;
+    border-radius: 50px;
+    border: 2px solid rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.1);
+    color: var(--white);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .btn:hover { background: rgba(255,255,255,0.25); border-color: #fff; }
+  .btn.active { background: var(--white); color: var(--red); border-color: var(--white); }
+
+  .btn-add {
+    background: var(--pink);
+    border-color: var(--pink);
+    color: #fff;
+  }
+  .btn-add:hover { background: var(--pink-light); border-color: var(--pink-light); }
+
+  .btn-export {
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(255,255,255,0.5);
+  }
+
+  /* ---- MAP ---- */
+  #map {
+    flex: 1;
+    z-index: 1;
+  }
+
+  /* ---- SIDEBAR ---- */
+  .sidebar {
+    position: absolute;
+    top: 82px;
+    right: 12px;
+    width: 310px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    background: var(--white);
+    border: 2px solid var(--cream-dark);
+    border-radius: 16px;
+    padding: 18px;
+    z-index: 999;
+    font-size: 13px;
+    box-shadow: 0 8px 30px rgba(45,24,16,0.1);
+  }
+
+  .sidebar h3 {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--red);
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--cream-dark);
+  }
+
+  .parking-item {
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--cream-dark);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    border-radius: 8px;
+  }
+  .parking-item:hover { background: var(--cream); }
+  .parking-item:last-child { border-bottom: none; }
+
+  .parking-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 3px;
+    border: 2px solid var(--white);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
+  .parking-content { flex: 1; }
+
+  .parking-name {
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    color: var(--text);
+  }
+
+  .parking-info {
+    font-size: 11px;
+    color: var(--text-light);
+    line-height: 1.5;
+  }
+
+  .status-badge {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 9px;
+    padding: 2px 10px;
+    border-radius: 50px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .status-confirmed { background: var(--green-light); color: var(--green); }
+  .status-pending { background: var(--yellow-light); color: var(--yellow); }
+  .status-abandoned { background: var(--grey-light); color: var(--grey); }
+
+  .total-bar {
+    margin-top: 14px;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--red), var(--pink));
+    border-radius: 12px;
+    text-align: center;
+    color: var(--white);
+  }
+  .total-bar .number {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+  }
+  .total-bar .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.9;
+    margin-top: 2px;
+  }
+
+  .legend {
+    margin-top: 14px;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--text-light);
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0,0,0,0.1);
+  }
+
+  /* ---- EDIT PANEL ---- */
+  .edit-panel {
+    position: absolute;
+    top: 82px;
+    left: 12px;
+    width: 340px;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    background: var(--white);
+    border: 2px solid var(--cream-dark);
+    border-radius: 16px;
+    padding: 20px;
+    z-index: 999;
+    display: none;
+    box-shadow: 0 8px 30px rgba(45,24,16,0.12);
+  }
+  .edit-panel.visible { display: block; }
+
+  .edit-panel h3 {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--red);
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .edit-close {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-size: 22px;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+  .edit-close:hover { color: var(--red); }
+
+  .field { margin-bottom: 14px; }
+
+  .field label {
+    display: block;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+  }
+
+  .field input, .field select, .field textarea {
+    width: 100%;
+    padding: 9px 14px;
+    background: var(--cream);
+    border: 2px solid var(--cream-dark);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: var(--red);
+  }
+  .field select { cursor: pointer; }
+  .field textarea { resize: vertical; min-height: 60px; }
+
+  .coord-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .edit-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 2px solid var(--cream-dark);
+  }
+
+  .btn-save {
+    flex: 1;
+    padding: 11px;
+    border-radius: 50px;
+    border: none;
+    background: var(--red);
+    color: var(--white);
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .btn-save:hover { background: var(--red-dark); }
+
+  .btn-delete {
+    padding: 11px 18px;
+    border-radius: 50px;
+    border: 2px solid #f87171;
+    background: var(--grey-light);
+    color: #f87171;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-delete:hover { background: #f87171; color: #fff; }
+
+  .drag-hint {
+    font-size: 11px;
+    color: var(--text-light);
+    font-style: italic;
+    margin-top: 5px;
+  }
+
+  /* ---- TOAST ---- */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--green);
+    color: #fff;
+    padding: 12px 28px;
+    border-radius: 50px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 9999;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    box-shadow: 0 6px 20px rgba(45,139,70,0.3);
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ---- LEAFLET POPUP ---- */
+  .leaflet-popup-content-wrapper {
+    background: var(--white) !important;
+    border: 2px solid var(--cream-dark) !important;
+    border-radius: 14px !important;
+    color: var(--text) !important;
+    font-family: 'Space Grotesk', sans-serif !important;
+    box-shadow: 0 6px 20px rgba(45,24,16,0.12) !important;
+  }
+  .leaflet-popup-tip {
+    background: var(--white) !important;
+    border: 1px solid var(--cream-dark) !important;
+  }
+  .leaflet-popup-content {
+    margin: 14px 16px !important;
+    font-size: 13px !important;
+    line-height: 1.6 !important;
+  }
+  .popup-title {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .popup-detail {
+    font-size: 12px;
+    color: var(--text-light);
+  }
+  .popup-detail strong { color: var(--red); }
+  .popup-edit-btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 6px 18px;
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .popup-edit-btn:hover { background: var(--red-dark); }
+
+  .leaflet-control-zoom a {
+    background: var(--white) !important;
+    color: var(--red) !important;
+    border-color: var(--cream-dark) !important;
+    font-weight: 700 !important;
+  }
+
+  @media (max-width: 768px) {
+    .sidebar { width: calc(100vw - 24px); right: 12px; }
+    .edit-panel { width: calc(100vw - 24px); left: 12px; }
+    header { padding: 8px 12px; flex-wrap: wrap; gap: 8px; }
+    .header-title { font-size: 14px; }
+    .header-logo { height: 40px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <img src="/logo.png" class="header-logo" alt="Grand Amour Festival">
+    <div class="header-title">
+      Plan des Parkings
+      <span>Organisation interne</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="btn active" onclick="toggleSatellite(false)" id="btn-plan">Plan</button>
+    <button class="btn" onclick="toggleSatellite(true)" id="btn-sat">Satellite</button>
+    <button class="btn" onclick="toggleSidebar()" id="btn-list">Liste</button>
+    <button class="btn btn-add" onclick="addNewParking()">+ Ajouter</button>
+    <button class="btn btn-export" onclick="exportData()">📁 Export</button>
+  </div>
+</header>
+
+<div id="map"></div>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar">
+  <h3>Parkings identifiés</h3>
+  <div id="parking-list"></div>
+  <div class="total-bar">
+    <div class="number" id="total-places">—</div>
+    <div class="label">Places estimées (total)</div>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Confirmé</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div> En négo</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--grey)"></div> Abandonné</div>
+  </div>
+</div>
+
+<!-- EDIT PANEL -->
+<div class="edit-panel" id="edit-panel">
+  <h3>
+    <span id="edit-title">Modifier</span>
+    <button class="edit-close" onclick="closeEditPanel()">&times;</button>
+  </h3>
+  <div class="field">
+    <label>Nom</label>
+    <input type="text" id="edit-name" placeholder="Ex: Parking VIP">
+  </div>
+  <div class="field">
+    <label>Statut</label>
+    <select id="edit-status">
+      <option value="confirmed">✅ Confirmé</option>
+      <option value="pending">⏳ En négociation</option>
+      <option value="abandoned">❌ Abandonné</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>Type</label>
+    <select id="edit-type">
+      <option value="parking">Parking</option>
+      <option value="venue">Salle / Lieu</option>
+    </select>
+  </div>
+  <div class="field">
+    <label>Nombre de places</label>
+    <input type="text" id="edit-places" placeholder="Ex: 200 ou 600-800">
+  </div>
+  <div class="field">
+    <label>Affectation</label>
+    <input type="text" id="edit-affectation" placeholder="Ex: VIP, PSH, Public...">
+  </div>
+  <div class="field">
+    <label>Notes</label>
+    <textarea id="edit-notes" placeholder="Infos complémentaires..."></textarea>
+  </div>
+  <div class="field">
+    <label>Coordonnées</label>
+    <div class="coord-row">
+      <input type="text" id="edit-lat" placeholder="Latitude">
+      <input type="text" id="edit-lng" placeholder="Longitude">
+    </div>
+    <div class="drag-hint">💡 Tu peux aussi glisser le marqueur sur la carte</div>
+  </div>
+  <div class="edit-actions">
+    <button class="btn-save" onclick="saveEdit()">💾 Enregistrer</button>
+    <button class="btn-delete" onclick="deleteParking()">Supprimer</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ========================================================
+// STATUS CONFIG
+// ========================================================
+const STATUS_CONFIG = {
+  confirmed: { color: '#2D8B46', label: 'Confirmé', badge: 'status-confirmed', icon: '✅' },
+  pending:   { color: '#E8A000', label: 'En négo',  badge: 'status-pending',   icon: '⏳' },
+  abandoned: { color: '#F87171', label: 'Abandonné', badge: 'status-abandoned', icon: '❌' }
+};
+
+const VENUE_COLOR = '#CC0000';
+
+function getColor(p) {
+  if (p.type === 'venue') return VENUE_COLOR;
+  return STATUS_CONFIG[p.status]?.color || '#888';
+}
+
+// ========================================================
+// DATA (from API)
+// ========================================================
+let parkings = [];
+let editingId = null;
+let markerObjects = {};
+
+async function loadParkings() {
+  try {
+    const res = await fetch('/api/parkings');
+    parkings = await res.json();
+  } catch (e) {
+    console.error('Erreur chargement:', e);
+    parkings = [];
+  }
+  renderMarkers();
+  renderList();
+}
+
+async function saveToServer() {
+  try {
+    await fetch('/api/parkings', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(parkings)
+    });
+  } catch (e) {
+    console.error('Erreur sauvegarde:', e);
+    showToast('❌ Erreur de sauvegarde');
+  }
+}
+
+// ========================================================
+// MAP
+// ========================================================
+const planLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19, attribution: '© OpenStreetMap'
+});
+const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom: 19, attribution: '© Esri'
+});
+const labelsLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19, opacity: 0.35
+});
+
+const map = L.map('map', {
+  center: [43.5192, 5.4220],
+  zoom: 16,
+  layers: [planLayer],
+  zoomControl: true
+});
+
+let isSatellite = false;
+
+function toggleSatellite(sat) {
+  isSatellite = sat;
+  if (sat) {
+    map.removeLayer(planLayer);
+    map.removeLayer(labelsLayer);
+    map.addLayer(satLayer);
+    map.addLayer(labelsLayer);
+    document.getElementById('btn-sat').classList.add('active');
+    document.getElementById('btn-plan').classList.remove('active');
+  } else {
+    map.removeLayer(satLayer);
+    map.removeLayer(labelsLayer);
+    map.addLayer(planLayer);
+    document.getElementById('btn-plan').classList.add('active');
+    document.getElementById('btn-sat').classList.remove('active');
+  }
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  sb.style.display = sb.style.display === 'none' ? 'block' : 'none';
+}
+
+// ========================================================
+// MARKERS
+// ========================================================
+function createIcon(color, isVenue) {
+  const size = isVenue ? 22 : 16;
+  const border = isVenue ? 3 : 2;
+  return L.divIcon({
+    className: '',
+    html: `<div style="
+      width:${size}px; height:${size}px;
+      background:${color};
+      border:${border}px solid #fff;
+      border-radius:50%;
+      box-shadow: 0 0 0 2px ${color}44, 0 2px 8px rgba(0,0,0,0.3);
+      cursor: grab;
+    "></div>`,
+    iconSize: [size, size],
+    iconAnchor: [size/2, size/2],
+    popupAnchor: [0, -size/2 - 4]
+  });
+}
+
+function buildPopup(p) {
+  const sc = STATUS_CONFIG[p.status] || STATUS_CONFIG.pending;
+  return `
+    <div class="popup-title">${p.name}</div>
+    <div class="popup-detail">
+      ${p.places ? `<strong>Places :</strong> ${p.places}<br>` : ''}
+      ${p.affectation ? `<strong>Affectation :</strong> ${p.affectation}<br>` : ''}
+      <strong>Statut :</strong> ${sc.icon} ${sc.label}<br>
+      ${p.notes ? `<em>${p.notes}</em>` : ''}
+    </div>
+    <button class="popup-edit-btn" onclick="openEditPanel('${p.id}')">✏️ Modifier</button>
+  `;
+}
+
+function renderMarkers() {
+  Object.values(markerObjects).forEach(obj => {
+    map.removeLayer(obj.marker);
+    map.removeLayer(obj.label);
+  });
+  markerObjects = {};
+
+  parkings.forEach(p => {
+    const color = getColor(p);
+    const icon = createIcon(color, p.type === 'venue');
+
+    const marker = L.marker([p.lat, p.lng], { icon, draggable: true })
+      .addTo(map)
+      .bindPopup(buildPopup(p));
+
+    marker.on('dragend', async function(e) {
+      const pos = e.target.getLatLng();
+      p.lat = Math.round(pos.lat * 1000000) / 1000000;
+      p.lng = Math.round(pos.lng * 1000000) / 1000000;
+      await saveToServer();
+      markerObjects[p.id].label.setLatLng([p.lat, p.lng]);
+      marker.setPopupContent(buildPopup(p));
+      if (editingId === p.id) {
+        document.getElementById('edit-lat').value = p.lat;
+        document.getElementById('edit-lng').value = p.lng;
+      }
+      showToast('📍 Position mise à jour');
+    });
+
+    const label = L.marker([p.lat, p.lng], {
+      icon: L.divIcon({
+        className: '',
+        html: `<div style="
+          font-family:'Fredoka',sans-serif;
+          font-size:12px;
+          font-weight:600;
+          color:#2D1810;
+          text-shadow: 0 0 6px #fff, 0 0 6px #fff, 0 0 6px #fff, 2px 2px 4px rgba(0,0,0,0.15);
+          white-space:nowrap;
+          pointer-events:none;
+          transform: translateY(-24px);
+        ">${p.name.replace(/\s?\(salle\)/, '')}</div>`,
+        iconSize: [0, 0],
+        iconAnchor: [0, 0]
+      }),
+      interactive: false
+    }).addTo(map);
+
+    markerObjects[p.id] = { marker, label };
+  });
+}
+
+// ========================================================
+// SIDEBAR
+// ========================================================
+function renderList() {
+  const list = document.getElementById('parking-list');
+  let total = 0;
+  let html = '';
+
+  parkings.filter(p => p.type === 'parking').forEach(p => {
+    const sc = STATUS_CONFIG[p.status] || STATUS_CONFIG.pending;
+    if (p.places && p.status !== 'abandoned') {
+      const match = String(p.places).match(/(\d+)/);
+      if (match) total += parseInt(match[1]);
+    }
+    html += `
+      <div class="parking-item" onclick="flyTo('${p.id}')">
+        <div class="parking-dot" style="background:${getColor(p)}"></div>
+        <div class="parking-content">
+          <div class="parking-name">
+            ${p.name}
+            <span class="status-badge ${sc.badge}">${sc.label}</span>
+          </div>
+          <div class="parking-info">
+            ${p.places ? `${p.places} places` : 'Places à définir'} · ${p.affectation || '—'}
+            ${p.notes ? `<br><em>${p.notes}</em>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  list.innerHTML = html;
+  document.getElementById('total-places').textContent = total > 0 ? total + '+' : '—';
+}
+
+function flyTo(id) {
+  const p = parkings.find(x => x.id === id);
+  if (!p) return;
+  map.flyTo([p.lat, p.lng], 18, { duration: 0.8 });
+  if (markerObjects[id]) markerObjects[id].marker.openPopup();
+}
+
+// ========================================================
+// EDIT PANEL
+// ========================================================
+function openEditPanel(id) {
+  const p = parkings.find(x => x.id === id);
+  if (!p) return;
+  editingId = id;
+
+  document.getElementById('edit-title').textContent = '✏️ ' + p.name;
+  document.getElementById('edit-name').value = p.name;
+  document.getElementById('edit-status').value = p.status;
+  document.getElementById('edit-type').value = p.type;
+  document.getElementById('edit-places').value = p.places || '';
+  document.getElementById('edit-affectation').value = p.affectation || '';
+  document.getElementById('edit-notes').value = p.notes || '';
+  document.getElementById('edit-lat').value = p.lat;
+  document.getElementById('edit-lng').value = p.lng;
+
+  document.getElementById('edit-panel').classList.add('visible');
+  map.closePopup();
+}
+
+function closeEditPanel() {
+  document.getElementById('edit-panel').classList.remove('visible');
+  editingId = null;
+}
+
+async function saveEdit() {
+  const p = parkings.find(x => x.id === editingId);
+  if (!p) return;
+
+  p.name = document.getElementById('edit-name').value.trim() || p.name;
+  p.status = document.getElementById('edit-status').value;
+  p.type = document.getElementById('edit-type').value;
+  p.places = document.getElementById('edit-places').value.trim();
+  p.affectation = document.getElementById('edit-affectation').value.trim();
+  p.notes = document.getElementById('edit-notes').value.trim();
+
+  const newLat = parseFloat(document.getElementById('edit-lat').value);
+  const newLng = parseFloat(document.getElementById('edit-lng').value);
+  if (!isNaN(newLat) && !isNaN(newLng)) {
+    p.lat = newLat;
+    p.lng = newLng;
+  }
+
+  await saveToServer();
+  renderMarkers();
+  renderList();
+  closeEditPanel();
+  showToast('✅ Modifications enregistrées');
+}
+
+async function deleteParking() {
+  if (!editingId) return;
+  const p = parkings.find(x => x.id === editingId);
+  if (!confirm(`Supprimer "${p.name}" ?`)) return;
+
+  parkings = parkings.filter(x => x.id !== editingId);
+  await saveToServer();
+  renderMarkers();
+  renderList();
+  closeEditPanel();
+  showToast('🗑️ Point supprimé');
+}
+
+// ========================================================
+// ADD NEW
+// ========================================================
+async function addNewParking() {
+  const center = map.getCenter();
+  const newP = {
+    id: 'parking-' + Date.now(),
+    name: 'Nouveau parking',
+    lat: Math.round(center.lat * 1000000) / 1000000,
+    lng: Math.round(center.lng * 1000000) / 1000000,
+    type: 'parking',
+    places: '',
+    status: 'pending',
+    affectation: '',
+    notes: ''
+  };
+  parkings.push(newP);
+  await saveToServer();
+  renderMarkers();
+  renderList();
+  openEditPanel(newP.id);
+  showToast('📌 Nouveau point ajouté');
+}
+
+// ========================================================
+// EXPORT
+// ========================================================
+function exportData() {
+  const json = JSON.stringify(parkings, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'parkings-gaf-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('📁 JSON exporté');
+}
+
+// ========================================================
+// TOAST
+// ========================================================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ========================================================
+// INIT
+// ========================================================
+loadParkings();
+</script>
+</body>
+</html>

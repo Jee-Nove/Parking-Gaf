@@ -1,0 +1,90 @@
+[
+  {
+    "id": "6mic",
+    "name": "6MIC (salle)",
+    "lat": 43.51921,
+    "lng": 5.42241,
+    "type": "venue",
+    "places": "",
+    "status": "confirmed",
+    "affectation": "Salle de spectacle",
+    "notes": "160 Rue Pascal Duverger"
+  },
+  {
+    "id": "p1-p2",
+    "name": "P1 & P2 (Orange)",
+    "lat": 43.5188,
+    "lng": 5.4235,
+    "type": "parking",
+    "places": "À définir",
+    "status": "pending",
+    "affectation": "À définir",
+    "notes": "Parkings fermés, négociations en cours"
+  },
+  {
+    "id": "sauvage",
+    "name": "Parking sauvage (face 6MIC)",
+    "lat": 43.5187,
+    "lng": 5.4214,
+    "type": "parking",
+    "places": "200",
+    "status": "confirmed",
+    "affectation": "Public",
+    "notes": "~200 places, en face du 6MIC"
+  },
+  {
+    "id": "grande-zone",
+    "name": "Grande zone à aménager",
+    "lat": 43.5178,
+    "lng": 5.4205,
+    "type": "parking",
+    "places": "600-800",
+    "status": "pending",
+    "affectation": "Public",
+    "notes": "Nécessite pelleteuses et damage"
+  },
+  {
+    "id": "psh-vip",
+    "name": "Parking PSH + VIP",
+    "lat": 43.5195,
+    "lng": 5.423,
+    "type": "parking",
+    "places": "À définir",
+    "status": "confirmed",
+    "affectation": "PSH + VIP",
+    "notes": "À côté des foodtrucks"
+  },
+  {
+    "id": "voyage-prive",
+    "name": "Parking Voyage Privé",
+    "lat": 43.51937,
+    "lng": 5.41986,
+    "type": "parking",
+    "places": "60 (souterrain) + ext.",
+    "status": "pending",
+    "affectation": "À définir",
+    "notes": "Souterrain 60 places (à négocier) + extérieur limité"
+  },
+  {
+    "id": "golf",
+    "name": "Parking Golf",
+    "lat": 43.5175,
+    "lng": 5.4185,
+    "type": "parking",
+    "places": "40-70 (+20)",
+    "status": "pending",
+    "affectation": "À définir",
+    "notes": "40-70 places + 20 si ouverture grillage"
+  },
+  {
+    "id": "carrefour",
+    "name": "Parking Carrefour",
+    "lat": 43.52848,
+    "lng": 5.43215,
+    "type": "parking",
+    "places": "Grand",
+    "status": "confirmed",
+    "affectation": "Public + navette",
+    "notes": "À ~1,5 km — navette prévue"
+  }
+]
