@@ -1,66 +1,55 @@
 [
   {
     "id": "6mic",
-    "name": "6MIC (salle)",
-    "lat": 43.51921,
-    "lng": 5.42241,
-    "type": "venue",
-    "places": "",
+    "name": "6MIC (Parking STAFF)",
+    "lat": 43.519222,
+    "lng": 5.422604,
+    "type": "parking",
+    "places": "20",
     "status": "confirmed",
-    "affectation": "Salle de spectacle",
-    "notes": "160 Rue Pascal Duverger"
+    "affectation": "Réservé Organisation",
+    "notes": "Orga\nPersonnel 6MIC\nTechnique GAF"
   },
   {
     "id": "p1-p2",
-    "name": "P1 & P2 (Orange)",
-    "lat": 43.5188,
-    "lng": 5.4235,
+    "name": "P1  (Orange)",
+    "lat": 43.515205,
+    "lng": 5.426353,
     "type": "parking",
-    "places": "À définir",
+    "places": "120",
     "status": "pending",
     "affectation": "À définir",
-    "notes": "Parkings fermés, négociations en cours"
+    "notes": "14min à pied\nParkings fermés"
   },
   {
     "id": "sauvage",
-    "name": "Parking sauvage (face 6MIC)",
-    "lat": 43.5187,
-    "lng": 5.4214,
+    "name": "Parking terre battue (face 6MIC)",
+    "lat": 43.518241,
+    "lng": 5.422089,
     "type": "parking",
     "places": "200",
-    "status": "confirmed",
+    "status": "pending",
     "affectation": "Public",
     "notes": "~200 places, en face du 6MIC"
   },
   {
-    "id": "grande-zone",
-    "name": "Grande zone à aménager",
-    "lat": 43.5178,
-    "lng": 5.4205,
-    "type": "parking",
-    "places": "600-800",
-    "status": "pending",
-    "affectation": "Public",
-    "notes": "Nécessite pelleteuses et damage"
-  },
-  {
     "id": "psh-vip",
     "name": "Parking PSH + VIP",
-    "lat": 43.5195,
-    "lng": 5.423,
+    "lat": 43.518679,
+    "lng": 5.422644,
     "type": "parking",
-    "places": "À définir",
+    "places": "40",
     "status": "confirmed",
     "affectation": "PSH + VIP",
-    "notes": "À côté des foodtrucks"
+    "notes": "Places handicapés \n& VIP"
   },
   {
     "id": "voyage-prive",
-    "name": "Parking Voyage Privé",
-    "lat": 43.51937,
-    "lng": 5.41986,
+    "name": "Parking Voyage Privé [Extérieur]",
+    "lat": 43.51862,
+    "lng": 5.420641,
     "type": "parking",
-    "places": "60 (souterrain) + ext.",
+    "places": "45",
     "status": "pending",
     "affectation": "À définir",
     "notes": "Souterrain 60 places (à négocier) + extérieur limité"
@@ -68,23 +57,67 @@
   {
     "id": "golf",
     "name": "Parking Golf",
-    "lat": 43.5175,
-    "lng": 5.4185,
+    "lat": 43.516821,
+    "lng": 5.4202,
     "type": "parking",
-    "places": "40-70 (+20)",
-    "status": "pending",
+    "places": "60",
+    "status": "confirmed",
     "affectation": "À définir",
-    "notes": "40-70 places + 20 si ouverture grillage"
+    "notes": "Parking Actuel"
   },
   {
     "id": "carrefour",
-    "name": "Parking Carrefour",
-    "lat": 43.52848,
-    "lng": 5.43215,
+    "name": "Carrefour",
+    "lat": 43.51614,
+    "lng": 5.436382,
     "type": "parking",
-    "places": "Grand",
-    "status": "confirmed",
+    "places": "200 ?",
+    "status": "pending",
     "affectation": "Public + navette",
-    "notes": "À ~1,5 km — navette prévue"
+    "notes": "À ~1,5 km — navette prévue\n6min en navette"
+  },
+  {
+    "id": "parking-1770980089360",
+    "name": "Parking Voyage Privé [Sous-Terrain]",
+    "lat": 43.519579,
+    "lng": 5.418971,
+    "type": "parking",
+    "places": "100",
+    "status": "pending",
+    "affectation": "À définir",
+    "notes": ""
+  },
+  {
+    "id": "parking-1770980224002",
+    "name": "6MIC [SALLE]",
+    "lat": 43.519299,
+    "lng": 5.422093,
+    "type": "venue",
+    "places": "",
+    "status": "confirmed",
+    "affectation": "",
+    "notes": ""
+  },
+  {
+    "id": "parking-1770980372639",
+    "name": "P2 [Orange]",
+    "lat": 43.516917,
+    "lng": 5.42793,
+    "type": "parking",
+    "places": "200",
+    "status": "pending",
+    "affectation": "À définir",
+    "notes": "15min à pied\nParking Orange en négo"
+  },
+  {
+    "id": "parking-1770980589985",
+    "name": "Parking Golf [Terre Battue]",
+    "lat": 43.51686,
+    "lng": 5.421059,
+    "type": "parking",
+    "places": "30",
+    "status": "pending",
+    "affectation": "À définir",
+    "notes": "A confirmer"
   }
 ]
